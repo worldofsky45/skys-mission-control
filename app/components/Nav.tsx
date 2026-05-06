@@ -2,13 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Bot, Radio, CheckSquare, Brain, Calendar } from 'lucide-react'
+import { Home, Bot, Radio, CheckSquare, Brain, Calendar, DollarSign, TrendingUp } from 'lucide-react'
 
 const navItems = [
   { href: '/', label: 'Overview', icon: Home },
   { href: '/agents', label: 'Agents', icon: Bot },
   { href: '/feed', label: 'Mission Feed', icon: Radio },
   { href: '/decisions', label: 'Decisions', icon: CheckSquare },
+  { href: '/paper-trading', label: '📊 Paper Trading', icon: TrendingUp },
+  { href: '/costs', label: '💰 Costs', icon: DollarSign },
   { href: '/memory', label: '🧠 Memory', icon: Brain },
   { href: '/calendar', label: '📅 Calendar', icon: Calendar },
 ]
