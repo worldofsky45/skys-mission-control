@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
-import { AlertTriangle, CheckCircle2, Clock, Inbox, MessageSquare, Plus, X, Zap } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Clock, Inbox, MessageSquare, Plus, X, Zap, TrendingUp, Activity, DollarSign, Target } from 'lucide-react'
 import { getStatCards, sprintData, type Task, type TaskStatus } from '@/lib/data'
 import { useBoardStore } from '@/lib/store'
 
@@ -449,6 +449,528 @@ function BlockerCard({
   )
 }
 
+// ─── Paper Trading Section ────────────────────────────────────────────────────
+function PaperTradingSection() {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/paper-trading')
+        const json = await res.json()
+        setData(json)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error fetching paper trading data:', error)
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+    const interval = setInterval(fetchData, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (loading) return null
+  if (!data?.stats) return null
+
+  const { stats, trades } = data
+  const activeTrades = trades.filter((t: any) => t.status === 'active').slice(0, 3)
+  const pnlColor = stats.totalPnLPct >= 0 ? '#10b981' : '#ef4444'
+
+  return (
+    <section>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="flex items-center gap-2 mb-4"
+      >
+        <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(135deg, #10b981, #22d3ee)' }} />
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">Paper Trading Status & P/L</h2>
+      </motion.div>
+
+      <div className="flex gap-3 flex-wrap mb-4">
+        <motion.div
+          custom={0}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="relative flex-1 min-w-[140px] rounded-xl p-4"
+          style={{
+            background: 'rgba(18,18,26,0.8)',
+            backdropFilter: 'blur(12px)',
+            border: `1px solid ${pnlColor}33`,
+            boxShadow: `0 0 20px ${pnlColor}22, inset 0 1px 0 rgba(255,255,255,0.05)`,
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span style={{ color: pnlColor }} className="opacity-80"><TrendingUp size={18} /></span>
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: pnlColor, boxShadow: `0 0 6px ${pnlColor}` }} />
+          </div>
+          <div className="text-3xl font-bold text-white mb-1">{stats.totalPnLPct.toFixed(1)}%</div>
+          <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Total P&L %</div>
+        </motion.div>
+
+        <motion.div
+          custom={1}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="relative flex-1 min-w-[140px] rounded-xl p-4"
+          style={{
+            background: 'rgba(18,18,26,0.8)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid #10b98133',
+            boxShadow: '0 0 20px #10b98122, inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span style={{ color: '#10b981' }} className="opacity-80"><Target size={18} /></span>
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#10b981', boxShadow: '0 0 6px #10b981' }} />
+          </div>
+          <div className="text-3xl font-bold text-white mb-1">{stats.winRate.toFixed(0)}%</div>
+          <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Win Rate</div>
+        </motion.div>
+
+        <motion.div
+          custom={2}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="relative flex-1 min-w-[140px] rounded-xl p-4"
+          style={{
+            background: 'rgba(18,18,26,0.8)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid #6366f133',
+            boxShadow: '0 0 20px #6366f122, inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span style={{ color: '#6366f1' }} className="opacity-80"><Activity size={18} /></span>
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#6366f1', boxShadow: '0 0 6px #6366f1' }} />
+          </div>
+          <div className="text-3xl font-bold text-white mb-1">{activeTrades.length}</div>
+          <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Active Positions</div>
+        </motion.div>
+      </div>
+
+      {activeTrades.length > 0 && (
+        <motion.div
+          custom={3}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="rounded-xl p-4"
+          style={{
+            background: 'rgba(18,18,26,0.8)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Recent Active Trades</div>
+          <div className="space-y-2">
+            {activeTrades.map((trade: any, i: number) => {
+              const pnl = ((trade.current_price || trade.entry_price) - trade.entry_price) * trade.position_size
+              const pnlColor = pnl >= 0 ? '#10b981' : '#ef4444'
+              return (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-2 rounded-lg"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}
+                >
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-slate-200">{trade.asset}</div>
+                    <div className="text-xs text-slate-500">Entry: ${trade.entry_price.toFixed(2)}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-bold" style={{ color: pnlColor }}>
+                      ${pnl.toFixed(2)}
+                    </div>
+                    <div className="text-xs text-slate-500">Unrealized</div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </motion.div>
+      )}
+    </section>
+  )
+}
+
+// ─── Polymarket Section ───────────────────────────────────────────────────────
+function PolymarketSection() {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/polymarket-signals')
+        const json = await res.json()
+        setData(json)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error fetching polymarket signals:', error)
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+    const interval = setInterval(fetchData, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (loading) return null
+  if (!data?.signals || data.signals.length === 0) return null
+
+  const signals = data.signals
+  const recentPredictions = signals.slice(-3).reverse()
+  
+  // Calculate stats
+  const completedSignals = signals.filter((s: any) => s.status === 'completed' || s.status === 'closed')
+  const correctPredictions = completedSignals.filter((s: any) => s.outcome === 'correct')
+  const accuracy = completedSignals.length > 0 ? (correctPredictions.length / completedSignals.length) * 100 : 0
+  const activeSignals = signals.filter((s: any) => s.status === 'active').length
+  const totalPnL = signals.reduce((sum: number, s: any) => sum + (s.pnl || 0), 0)
+  const pnlColor = totalPnL >= 0 ? '#10b981' : '#ef4444'
+
+  return (
+    <section>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="flex items-center gap-2 mb-4"
+      >
+        <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)' }} />
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">Polymarket Signals & Performance</h2>
+      </motion.div>
+
+      <div className="flex gap-3 flex-wrap mb-4">
+        <motion.div
+          custom={0}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="relative flex-1 min-w-[140px] rounded-xl p-4"
+          style={{
+            background: 'rgba(18,18,26,0.8)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid #a855f733',
+            boxShadow: '0 0 20px #a855f722, inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span style={{ color: '#a855f7' }} className="opacity-80"><Target size={18} /></span>
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#a855f7', boxShadow: '0 0 6px #a855f7' }} />
+          </div>
+          <div className="text-3xl font-bold text-white mb-1">{accuracy.toFixed(0)}%</div>
+          <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Prediction Accuracy</div>
+        </motion.div>
+
+        <motion.div
+          custom={1}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="relative flex-1 min-w-[140px] rounded-xl p-4"
+          style={{
+            background: 'rgba(18,18,26,0.8)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid #6366f133',
+            boxShadow: '0 0 20px #6366f122, inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span style={{ color: '#6366f1' }} className="opacity-80"><Activity size={18} /></span>
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#6366f1', boxShadow: '0 0 6px #6366f1' }} />
+          </div>
+          <div className="text-3xl font-bold text-white mb-1">{activeSignals}</div>
+          <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Active Signals</div>
+        </motion.div>
+
+        <motion.div
+          custom={2}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="relative flex-1 min-w-[140px] rounded-xl p-4"
+          style={{
+            background: 'rgba(18,18,26,0.8)',
+            backdropFilter: 'blur(12px)',
+            border: `1px solid ${pnlColor}33`,
+            boxShadow: `0 0 20px ${pnlColor}22, inset 0 1px 0 rgba(255,255,255,0.05)`,
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span style={{ color: pnlColor }} className="opacity-80"><DollarSign size={18} /></span>
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: pnlColor, boxShadow: `0 0 6px ${pnlColor}` }} />
+          </div>
+          <div className="text-3xl font-bold text-white mb-1">${totalPnL.toFixed(0)}</div>
+          <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Total P&L</div>
+        </motion.div>
+      </div>
+
+      {recentPredictions.length > 0 && (
+        <motion.div
+          custom={3}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="rounded-xl p-4"
+          style={{
+            background: 'rgba(18,18,26,0.8)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Recent Predictions</div>
+          <div className="space-y-2">
+            {recentPredictions.map((signal: any, i: number) => {
+              const statusColor = signal.status === 'active' ? '#6366f1' : signal.outcome === 'correct' ? '#10b981' : '#ef4444'
+              return (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-2 rounded-lg"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}
+                >
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-slate-200">{signal.market || 'Unknown Market'}</div>
+                    <div className="text-xs text-slate-500">
+                      Prediction: {signal.prediction} • Confidence: {signal.confidence || 'N/A'}
+                    </div>
+                  </div>
+                  <div
+                    className="text-xs px-2 py-1 rounded-full font-medium"
+                    style={{ backgroundColor: `${statusColor}22`, color: statusColor, border: `1px solid ${statusColor}33` }}
+                  >
+                    {signal.status || 'active'}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </motion.div>
+      )}
+    </section>
+  )
+}
+
+// ─── ROI Section ──────────────────────────────────────────────────────────────
+function ROISection() {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/roi-tracker')
+        const json = await res.json()
+        setData(json)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error fetching ROI tracker data:', error)
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+    const interval = setInterval(fetchData, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (loading) return null
+  if (!data?.projects || data.projects.length === 0) return null
+
+  // Sort by ROI percentage and take top 3
+  const sortedProjects = [...data.projects]
+    .filter((p: any) => p.roi_percentage !== undefined)
+    .sort((a: any, b: any) => (b.roi_percentage || 0) - (a.roi_percentage || 0))
+    .slice(0, 3)
+
+  const badges = [
+    { label: '🥇 #1', color: '#fbbf24' },
+    { label: '🥈 #2', color: '#94a3b8' },
+    { label: '🥉 #3', color: '#fb923c' },
+  ]
+
+  return (
+    <section>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="flex items-center gap-2 mb-4"
+      >
+        <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(135deg, #fbbf24, #fb923c)' }} />
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">ROI Tracking</h2>
+      </motion.div>
+
+      <div className="flex gap-3 flex-wrap">
+        {sortedProjects.map((project: any, i: number) => {
+          const badge = badges[i]
+          const roiColor = project.roi_percentage >= 0 ? '#10b981' : '#ef4444'
+          return (
+            <motion.div
+              key={i}
+              custom={i}
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              className="relative flex-1 min-w-[180px] rounded-xl p-4"
+              style={{
+                background: 'rgba(18,18,26,0.8)',
+                backdropFilter: 'blur(12px)',
+                border: `1px solid ${badge.color}33`,
+                boxShadow: `0 0 20px ${badge.color}22, inset 0 1px 0 rgba(255,255,255,0.05)`,
+              }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span
+                  className="text-xs px-2 py-1 rounded-full font-bold"
+                  style={{ backgroundColor: `${badge.color}22`, color: badge.color, border: `1px solid ${badge.color}44` }}
+                >
+                  {badge.label}
+                </span>
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: badge.color, boxShadow: `0 0 6px ${badge.color}` }} />
+              </div>
+              <div className="text-lg font-bold text-white mb-1">{project.project_name || 'Unknown'}</div>
+              <div className="text-xs text-slate-500 mb-2">Invested: ${project.invested_amount?.toFixed(0) || '0'}</div>
+              <div className="flex items-baseline gap-2">
+                <div className="text-2xl font-bold" style={{ color: roiColor }}>
+                  {project.roi_percentage?.toFixed(1) || '0'}%
+                </div>
+                <div className="text-sm text-slate-400">${project.roi_value?.toFixed(0) || '0'}</div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+// ─── System Health Section ────────────────────────────────────────────────────
+function SystemHealthSection() {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/system-health')
+        const json = await res.json()
+        setData(json)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error fetching system health:', error)
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+    const interval = setInterval(fetchData, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (loading) return null
+  if (!data) return null
+
+  const statusColors = {
+    healthy: '#10b981',
+    degraded: '#f59e0b',
+    critical: '#ef4444',
+  }
+
+  const statusColor = statusColors[data.status as keyof typeof statusColors] || '#94a3b8'
+  const statusLabels = {
+    healthy: 'All Systems Operational',
+    degraded: 'Some Systems Degraded',
+    critical: 'Critical Systems Down',
+  }
+
+  return (
+    <section>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="flex items-center gap-2 mb-4"
+      >
+        <div className="w-3 h-3 rounded-sm" style={{ background: `linear-gradient(135deg, ${statusColor}, #6366f1)` }} />
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">System Health</h2>
+      </motion.div>
+
+      <motion.div
+        custom={0}
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        className="rounded-xl p-4 cursor-pointer"
+        style={{
+          background: 'rgba(18,18,26,0.8)',
+          backdropFilter: 'blur(12px)',
+          border: `1px solid ${statusColor}33`,
+          boxShadow: `0 0 20px ${statusColor}22, inset 0 1px 0 rgba(255,255,255,0.05)`,
+        }}
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: statusColor, boxShadow: `0 0 12px ${statusColor}` }}
+            />
+            <div>
+              <div className="text-sm font-bold text-white">{statusLabels[data.status as keyof typeof statusLabels]}</div>
+              <div className="text-xs text-slate-500">Click to {expanded ? 'hide' : 'view'} details</div>
+            </div>
+          </div>
+          <div
+            className="text-xs px-3 py-1.5 rounded-full font-bold uppercase"
+            style={{ backgroundColor: `${statusColor}22`, color: statusColor, border: `1px solid ${statusColor}44` }}
+          >
+            {data.status}
+          </div>
+        </div>
+
+        {expanded && data.files && (
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">File Statuses</div>
+            <div className="space-y-2">
+              {data.files.map((file: any, i: number) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-2 rounded-lg"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}
+                >
+                  <div className="text-xs text-slate-300">{file.name}</div>
+                  <div
+                    className="text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={{
+                      backgroundColor: file.exists ? '#10b98122' : '#ef444422',
+                      color: file.exists ? '#10b981' : '#ef4444',
+                      border: file.exists ? '1px solid #10b98133' : '1px solid #ef444433',
+                    }}
+                  >
+                    {file.exists ? '✓ OK' : '✗ Missing'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </section>
+  )
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 let taskCounter = 1000
@@ -655,6 +1177,18 @@ export default function Dashboard() {
             </div>
           </DragDropContext>
         </section>
+
+        {/* ── Paper Trading Status & P/L ── */}
+        <PaperTradingSection />
+
+        {/* ── Polymarket Signals & Performance ── */}
+        <PolymarketSection />
+
+        {/* ── ROI Tracking ── */}
+        <ROISection />
+
+        {/* ── System Health ── */}
+        <SystemHealthSection />
 
         {/* ── Go-Live Blockers ── */}
         {sprintData.go_live_blockers.length > 0 && (
