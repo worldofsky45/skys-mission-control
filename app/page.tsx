@@ -135,33 +135,38 @@ function PaperTradingSection() {
 
       {activeTrades.length > 0 && (
         <div className="space-y-2">
-          {activeTrades.map((trade: any, i: number) => (
-            <motion.div
-              key={trade.timestamp}
-              custom={i + 3}
-              initial="hidden"
-              animate="visible"
-              variants={fadeInUp}
-              className="rounded-lg p-3"
-              style={{
-                background: 'rgba(18,18,26,0.6)',
-                border: '1px solid rgba(255,255,255,0.06)',
-              }}
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-sm font-semibold text-slate-200">{trade.pair}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">{trade.reason}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs text-slate-400">Entry: ${trade.entry_price.toLocaleString()}</div>
-                  <div className={`text-xs font-semibold ${trade.unrealized_pnl_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {trade.unrealized_pnl_pct >= 0 ? '+' : ''}{trade.unrealized_pnl_pct.toFixed(2)}%
+          {activeTrades.map((trade: any, i: number) => {
+            const pnlPct = trade.pnl_pct || 0
+            const pnlColor = pnlPct >= 0 ? 'text-emerald-400' : 'text-red-400'
+            
+            return (
+              <motion.div
+                key={trade.id}
+                custom={i + 3}
+                initial="hidden"
+                animate="visible"
+                variants={fadeInUp}
+                className="rounded-lg p-3"
+                style={{
+                  background: 'rgba(18,18,26,0.6)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-200">{trade.asset}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{trade.signal}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-slate-400">Entry: ${trade.entry_price.toLocaleString()}</div>
+                    <div className={`text-xs font-semibold ${pnlColor}`}>
+                      {pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            )
+          })}
         </div>
       )}
     </section>
