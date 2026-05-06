@@ -46,8 +46,16 @@ function PaperTradingSection() {
   if (!data?.stats) return null
 
   const { stats, trades } = data
+  
+  // Ensure stats has all required properties with defaults
+  const safeStats = {
+    totalPnLPct: stats.totalPnLPct || 0,
+    winRate: stats.winRate || 0,
+    riskReward: stats.riskReward || 0,
+    ...stats
+  }
   const activeTrades = trades.filter((t: any) => t.status === 'active').slice(0, 3)
-  const pnlColor = stats.totalPnLPct >= 0 ? '#10b981' : '#ef4444'
+  const pnlColor = safeStats.totalPnLPct >= 0 ? '#10b981' : '#ef4444'
 
   return (
     <section>
@@ -79,7 +87,7 @@ function PaperTradingSection() {
             <TrendingUp size={18} style={{ color: pnlColor }} />
           </div>
           <div className="text-2xl font-bold mb-1" style={{ color: pnlColor }}>
-            {stats.totalPnLPct >= 0 ? '+' : ''}{stats.totalPnLPct.toFixed(2)}%
+            {safeStats.totalPnLPct >= 0 ? '+' : ''}{safeStats.totalPnLPct.toFixed(2)}%
           </div>
           <div className="text-xs text-slate-400">Total P&L</div>
         </motion.div>
@@ -100,7 +108,7 @@ function PaperTradingSection() {
           <div className="flex items-center justify-between mb-2">
             <Activity size={18} style={{ color: '#6366f1' }} />
           </div>
-          <div className="text-2xl font-bold text-white mb-1">{stats.winRate.toFixed(0)}%</div>
+          <div className="text-2xl font-bold text-white mb-1">{safeStats.winRate.toFixed(0)}%</div>
           <div className="text-xs text-slate-400">Win Rate</div>
         </motion.div>
 
@@ -120,7 +128,7 @@ function PaperTradingSection() {
           <div className="flex items-center justify-between mb-2">
             <Target size={18} style={{ color: '#22d3ee' }} />
           </div>
-          <div className="text-2xl font-bold text-white mb-1">{stats.riskRewardRatio.toFixed(2)}</div>
+          <div className="text-2xl font-bold text-white mb-1">{safeStats.riskReward.toFixed(2)}</div>
           <div className="text-xs text-slate-400">Risk/Reward</div>
         </motion.div>
       </div>
