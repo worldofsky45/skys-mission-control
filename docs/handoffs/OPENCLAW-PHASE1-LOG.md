@@ -106,6 +106,12 @@ Continuing Phase 1 page work:
   - Added validated activity event schemas/types and `src/lib/activity.ts` JSONL append/read helpers.
   - Added `ActivityFeed` to Overview with recent events, type/system badges, and expandable signal/opportunity details.
   - Verification passed: `npm test` (31 files, 90 tests), `npm run typecheck`, `npm run lint`, `npm run build`, local `/api/activity` POST/GET smoke using `/private/tmp`, and browser Overview smoke with expanded details and no console warnings/errors.
+- OpenClaw automation loop scripts are now implemented locally:
+  - Added `scripts/openclaw/update-positions.js` for paper-trading position/balance refresh, target/stop alerts, job-run logging, jobs-schedule updates, and optional `/api/activity` posting.
+  - Added `scripts/openclaw/update-scorecard.js` for crypto scorecard target/stop checks and append-only scorecard update records.
+  - Added `scripts/openclaw/aggregate-daily-roi.js` plus `aggregate-daily-roi.sh` for daily AI cost aggregation into `roi-tracker.jsonl`, job-run logging, jobs-schedule updates, and activity posting.
+  - Added `scripts/openclaw/install-cron.sh` and `print-cron.js`; cron installation remains explicit/manual after review.
+  - Verification passed: focused automation tests, full `npm test`, `npm run lint`, `npm run typecheck`, script syntax checks, `git diff --check`, temp-workspace smoke for all three scripts, browser smoke on `/`, `/paper-trading`, `/polymarket`, `/ideas`, and `/health`, and `npm run build` outside the sandbox after the known Turbopack port-binding restriction.
 
 ---
 
