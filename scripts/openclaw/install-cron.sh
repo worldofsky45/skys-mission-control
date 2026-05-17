@@ -2,12 +2,14 @@
 set -euo pipefail
 
 MISSION_CONTROL_ROOT="${MISSION_CONTROL_ROOT:-/Users/sky/Documents/Codex/mission-control}"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-/Users/sky/.openclaw/workspace}"
 MARKER_BEGIN="# BEGIN Mission Control OpenClaw automation"
 MARKER_END="# END Mission Control OpenClaw automation"
 
 entries="$("$MISSION_CONTROL_ROOT/scripts/openclaw/print-cron.js")"
 
 if [[ "${1:-}" == "--install" ]]; then
+  mkdir -p "$WORKSPACE_ROOT/logs"
   existing="$(crontab -l 2>/dev/null || true)"
   filtered="$(printf '%s\n' "$existing" | sed "/$MARKER_BEGIN/,/$MARKER_END/d")"
   {

@@ -50,4 +50,4 @@ Install only after review:
 /Users/sky/Documents/Codex/mission-control/scripts/openclaw/install-cron.sh --install
 ```
 
-The cron entries run paper-trading position checks at 12:00 PM and 6:00 PM CT, scorecard updates at 11:00 PM CT, and ROI cost aggregation at 11:00 PM CT.
+The cron entries run paper-trading position checks at 12:00 PM and 6:00 PM CT, scorecard updates at 11:00 PM CT, and ROI cost aggregation at 11:05 PM CT.

@@ -212,6 +212,12 @@ describe("OpenClaw automation helpers", () => {
     expect(buildCronEntries("/Users/sky/Documents/Codex/mission-control")).toContain(
       "JOB_ID=paper-trading-midday-check /Users/sky/Documents/Codex/mission-control/scripts/openclaw/update-positions.js",
     );
+    expect(buildCronEntries("/Users/sky/Documents/Codex/mission-control")).toContain(
+      "0 23 * * * JOB_ID=crypto-intel-scorecard-update",
+    );
+    expect(buildCronEntries("/Users/sky/Documents/Codex/mission-control")).toContain(
+      "5 23 * * * JOB_ID=roi-daily-aggregation",
+    );
   });
 
   test("ensures automation jobs exist without removing existing schedule entries", () => {

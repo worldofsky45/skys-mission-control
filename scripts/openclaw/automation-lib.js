@@ -54,7 +54,7 @@ const REQUIRED_AUTOMATION_JOBS = [
   {
     id: "roi-daily-aggregation",
     name: "ROI Daily Aggregation",
-    schedule: "Daily 11:00 PM CT",
+    schedule: "Daily 11:05 PM CT",
     description: "Aggregate daily AI costs into ROI tracking and activity feed",
     cost_per_run: 0,
     runs_per_month: 30,
@@ -261,7 +261,7 @@ export function buildCronEntries(root = DEFAULT_MISSION_CONTROL_ROOT) {
     `0 12 * * * JOB_ID=paper-trading-midday-check ${scriptRoot}/update-positions.js >> ${logRoot}/paper-trading-update.log 2>&1`,
     `0 18 * * * JOB_ID=paper-trading-evening-check ${scriptRoot}/update-positions.js >> ${logRoot}/paper-trading-update.log 2>&1`,
     `0 23 * * * JOB_ID=crypto-intel-scorecard-update ${scriptRoot}/update-scorecard.js >> ${logRoot}/scorecard-update.log 2>&1`,
-    `0 23 * * * JOB_ID=roi-daily-aggregation ${scriptRoot}/aggregate-daily-roi.sh >> ${logRoot}/roi-aggregation.log 2>&1`,
+    `5 23 * * * JOB_ID=roi-daily-aggregation ${scriptRoot}/aggregate-daily-roi.sh >> ${logRoot}/roi-aggregation.log 2>&1`,
   ].join("\n");
 }
 
