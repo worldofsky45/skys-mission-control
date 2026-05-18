@@ -47,7 +47,24 @@ const jobs: JobsResponse = {
       latest_run: null,
     },
   ],
-  recent_runs: [],
+  recent_runs: [
+    {
+      timestamp: "2026-05-07T08:05:00-05:00",
+      job_id: "polymarket-intel-brief",
+      status: "failed",
+      duration_seconds: 12,
+      cost: 0,
+      output_summary: "Missing market cache",
+    },
+    {
+      timestamp: "2026-05-07T07:04:00-05:00",
+      job_id: "crypto-intel-brief",
+      status: "success",
+      duration_seconds: 154,
+      cost: 0.45,
+      output_summary: "3 signals generated",
+    },
+  ],
   last_updated: "2026-05-07T08:05:00-05:00",
 };
 
@@ -58,7 +75,10 @@ describe("HealthJobs", () => {
     expect(screen.getByRole("heading", { name: "Automation Jobs" })).toBeInTheDocument();
     expect(screen.getByText("$24.90")).toBeInTheDocument();
     expect(screen.getByText("Crypto Intel Daily Brief")).toBeInTheDocument();
-    expect(screen.getByText("3 signals generated")).toBeInTheDocument();
+    expect(screen.getAllByText("3 signals generated")).toHaveLength(2);
     expect(screen.getByText("Polymarket Intel Brief")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Recent Runs" })).toBeInTheDocument();
+    expect(screen.getByText("polymarket-intel-brief")).toBeInTheDocument();
+    expect(screen.getByText("Missing market cache")).toBeInTheDocument();
   });
 });
